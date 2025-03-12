@@ -1,12 +1,18 @@
-# React + Vite
+# ToDo list app
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Простое приложение для управления задачами, созданное с использованием React и Vite.
 
-Currently, two official plugins are available:
+## Описание
+Это приложение позволяет пользователям:
+- Добавлять новые задачи.
+- Отмечать выполненные задачи.
+- Удалять задачи.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Установка
+1. Убедитесь, что у вас установлен Node.js (версия 16.x.x или выше).
+2. Клонируйте репозиторий:
+   ```bash
+   git clone https://github.com/DaryaPogas/ToDoList.git
+   cd ToDoList
+   npm istall
+3. Для запуска сервера разработки выполните команду: `npm run dev`
