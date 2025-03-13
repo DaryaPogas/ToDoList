@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+../Meteo-API-project/
+../Weather-or-Not-Here-s-Art/
+../darya-debugging/
+../darya-pogas-jupiter/

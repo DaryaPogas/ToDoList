@@ -1,4 +1,3 @@
-import { title } from 'faker/lib/locales/az'
 import './App.css'
 
 function App() {
@@ -16,6 +15,5 @@ function App() {
     </div>
   )
 }
-
 
 export default App
