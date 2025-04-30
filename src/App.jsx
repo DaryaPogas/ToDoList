@@ -19,7 +19,7 @@ function App() {
       }
       return todo
     })
-    setTodoList(updatedTodo)
+    setTodoList([...updatedTodo])
   }
 
   return (
