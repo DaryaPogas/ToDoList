@@ -1,34 +1,35 @@
-import { useRef, useState } from "react";
+import { useRef, useState } from 'react';
+import  TextInputWithLabel  from '../shared/TextInputWithLabel';
 
-const TodoForm  = ({onAddTodo}) => {
-    const [workingTodo, setWorkingTodo]= useState('')
-    
-    function handleAddTodo (event){
-        event.preventDefault()
+const TodoForm = ({ onAddTodo }) => {
+  const [workingTodo, setWorkingTodo] = useState('');
+  const inputRef = useRef(null);
 
-        const newTodo = {
-            id: Date.now(), 
-            title: workingTodo,
-        };
-        //console.log(newTodo);
+  function handleAddTodo(event) {
+    event.preventDefault();
 
-        onAddTodo(newTodo)
-        setWorkingTodo('');
-    }
+    const newTodo = {
+      id: Date.now(),
+      title: workingTodo,
+    };
+    //console.log(newTodo);
 
-    return (
-      <form onSubmit={handleAddTodo}>
-        <label htmlFor="todoTitle">Todo</label>
-        <input 
-            type="text"
-            id="todoTitle" 
-            name="title" 
-            value={workingTodo}
-            onChange={(event) => setWorkingTodo(event.target.value)}
-            />
-        <button disabled={workingTodo.length === 0}>Add Todo</button>
-      </form>
-    );
-}
+    onAddTodo(newTodo);
+    setWorkingTodo('');
+    inputRef.current?.focus();
+  }
 
-export default TodoForm
+  return (
+    <form onSubmit={handleAddTodo}>
+      <TextInputWithLabel
+        elementId="todoTitle"
+        labelText="Todo"
+        value={workingTodo}
+        onChange={(event) => setWorkingTodo(event.target.value)}
+      />
+      <button disabled={workingTodo.length === 0}>Add Todo</button>
+    </form>
+  );
+};
+
+export default TodoForm;
