@@ -1,22 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TextInputWithLabel from '../../shared/TextInputWithLabel';
 
 function TodoListItem({ todo, onCompleteTodo, onUpdateTodo }) {
   const [isEditing, setIsEditing] = useState(false);
   const [workingTitle, setWorkingTitle] = useState(todo.title);
 
+  useEffect(() => {
+    setWorkingTitle(todo.title);
+  }, [todo]);
+
   const handleCancel = () => {
     setWorkingTitle(todo.title);
-    setIsEditing(false); 
+    setIsEditing(false);
   };
 
   const handleEdit = (e) => {
-    setWorkingTitle(e.target.value); 
+    setWorkingTitle(e.target.value);
   };
 
   const handleUpdate = (e) => {
     e.preventDefault();
-    onUpdateTodo({ id: todo.id, title: workingTitle });
+    onUpdateTodo({
+      id: todo.id,
+      title: workingTitle,
+      isCompleted: todo.isCompleted,
+    });
     setIsEditing(false);
   };
 
@@ -39,10 +47,7 @@ function TodoListItem({ todo, onCompleteTodo, onUpdateTodo }) {
               Cancel
             </button>
 
-            <button
-              type="submit" 
-              style={{ marginLeft: '8px' }}
-            >
+            <button type="submit" style={{ marginLeft: '8px' }}>
               Update
             </button>
           </>
@@ -66,4 +71,3 @@ function TodoListItem({ todo, onCompleteTodo, onUpdateTodo }) {
 }
 
 export default TodoListItem;
-
