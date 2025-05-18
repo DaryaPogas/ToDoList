@@ -23,6 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
+.env.local
+
+
+
 ../Meteo-API-project/
 ../Weather-or-Not-Here-s-Art/
 ../darya-debugging/
