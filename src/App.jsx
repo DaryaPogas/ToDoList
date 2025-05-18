@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import './App.css'
 import TodoList from './features/TodoList/TodoList'
 import TodoForm from './features/TodoForm'
@@ -14,25 +14,36 @@ function App() {
   const [sortField, setSortField] = useState('createdTime')
   const [sortDirection, setSortDirection] = useState('desc')
 
-  const [queryString, setQueryString] = useState('');
+  const [queryString, setQueryString] = useState('')
+
+  const [debouncedQueryString, setDebouncedQueryString] = useState('')
 
   const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${import.meta.env.VITE_TABLE_NAME}`;
   const token = `Bearer ${import.meta.env.VITE_PAT}`;
 
-  const encodeUrl = ({ sortField, sortDirection, queryString }) => {
+  const encodeUrl = useCallback(() => {
   let sortQuery = `sort[0][field]=${sortField}&sort[0][direction]=${sortDirection}`;
   let searchQuery = '';
 
-  if (queryString){
-    searchQuery = `&filterByFormula=SEARCH("${queryString}",{title})`;
+  if (debouncedQueryString){
+    searchQuery = `&filterByFormula=SEARCH("${debouncedQueryString}",{title})`;
   }
   return encodeURI(`${url}?${sortQuery}${searchQuery}`);
-  };
+  }, [sortField, sortDirection,debouncedQueryString, url]);
+
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedQueryString(queryString)
+    }, 500)
+    return () => {
+      clearTimeout(timerId)
+    };
+  }, [queryString]);
+
 
   useEffect (() => {
     const fetchTodos = async () => {
       setIsLoading(true)
-
       try {
         const options = {
           method:'GET',
@@ -41,7 +52,7 @@ function App() {
           }
         }
         const resp = await fetch(
-          encodeUrl({ sortField, sortDirection, queryString }),
+          encodeUrl(),
           options
         );
 
@@ -67,7 +78,7 @@ function App() {
       }
     }
     fetchTodos()
-  }, [sortField, sortDirection, queryString])
+  }, [sortField, sortDirection, debouncedQueryString])
 
   const handleAddTodo = async (newTodo) => {
 
@@ -93,7 +104,7 @@ function App() {
     try {
       setIsSaving(true);
       const resp = await fetch(
-        encodeUrl({ sortField, sortDirection, queryString }),
+        encodeUrl(),
         options
       );
       if(!resp.ok){
@@ -142,7 +153,7 @@ function App() {
       ]
     };
     const response = await fetch(
-      encodeUrl({ sortField, sortDirection, queryString }), {
+      encodeUrl(), {
       method: 'PATCH',
       headers: {
         Authorization: token,
@@ -202,7 +213,7 @@ function App() {
 
       try {
         const resp = await fetch(
-          encodeUrl({ sortField, sortDirection, queryString }),
+          encodeUrl(),
           options
         );
         if (!resp.ok) {
