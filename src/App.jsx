@@ -1,9 +1,23 @@
 import { useEffect, useState, useCallback } from 'react'
+
+import styles from './App.module.css';
 import './App.css'
+import styled from 'styled-components';
+
+import backgroundImage from '../src/assets/images/todo-seamless-backgr.jpg';
+
 import TodoList from './features/TodoList/TodoList'
 import TodoForm from './features/TodoForm'
 import TodoListItem from './features/TodoList/TodoListItem'
 import TodosViewForm from './features/TodosViewForm'
+
+
+const AppContainer = styled.div`
+  background: url(${backgroundImage});
+  padding: 20px;
+  min-height:100vh;
+`;
+
 
 function App() {
   const [todoList, setTodoList] = useState([])
@@ -259,34 +273,39 @@ function App() {
     };
 
   return (
+    <AppContainer>
     <div>
       <h1>My Todos</h1>
-      <TodoForm onAddTodo={handleAddTodo} />
-      <TodoList
-        todoList={todoList}
-        onCompleteTodo={completeTodo}
-        onUpdateTodo={updateTodo}
-        isLoading={isLoading}
-      />
-      <hr />
-      <TodosViewForm
-        sortDirection={sortDirection}
-        setSortDirection={setSortDirection}
-        sortField={sortField}
-        setSortField={setSortField}
-        queryString={queryString}
-        setQueryString={setQueryString}
-      />
+      <div className={styles.container}>
+        <TodoForm onAddTodo={handleAddTodo} />
+        <TodoList
+          todoList={todoList}
+          onCompleteTodo={completeTodo}
+          onUpdateTodo={updateTodo}
+          isLoading={isLoading}
+        />
+        <hr />
+        <TodosViewForm
+          sortDirection={sortDirection}
+          setSortDirection={setSortDirection}
+          sortField={sortField}
+          setSortField={setSortField}
+          queryString={queryString}
+          setQueryString={setQueryString}
+        />
+      </div>
 
-      {errorMessage &&(
-        <div className="error-message">
+      {errorMessage && (
+        <div className={styles.errorMessage}>
           <hr />
           <p>{errorMessage}</p>
           <button onClick={() => setErrorMessage('')}>Dismiss</button>
         </div>
       )}
     </div>
+  </AppContainer>  
   );
 }
 
+    
 export default App
