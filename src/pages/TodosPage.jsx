@@ -6,7 +6,6 @@ import TodoForm from '../features/TodoForm';
 import TodosViewForm from '../features/TodosViewForm';
 
 export default function TodosPage({
-  //props from App.jsx
   todoList,
   isLoading,
   errorMessage,
@@ -29,19 +28,15 @@ export default function TodosPage({
 const navigate = useNavigate();
 
 useEffect(() => {
-    if (
-      isNaN(currentPage) || 
-      currentPage < 1 || 
-      (totalPages > 0 && currentPage > totalPages)
-    ) {
-      navigate('/?page=1');
-    }
-  }, [currentPage, totalPages, navigate]);
-
-const effectiveTotalPages = Math.max(
-  1,
-  Math.ceil(todoList.length / itemsPerPage)
-);
+  if (
+    isNaN(currentPage) ||
+    currentPage < 1 ||
+    (totalPages > 0 && currentPage > totalPages)
+  ) {
+    onPageChange(1);
+    navigate('/?page=1');
+  }
+}, [currentPage, totalPages, navigate, onPageChange]);
 
   return (
     <div className="todos-page">
@@ -54,7 +49,7 @@ const effectiveTotalPages = Math.max(
         isLoading={isLoading}
       />
 
-      {effectiveTotalPages > 1 && (
+      {totalPages > 1 && (
         <div className="pagination">
           <button
             onClick={() => onPageChange(Math.max(1, currentPage - 1))}
@@ -64,14 +59,14 @@ const effectiveTotalPages = Math.max(
           </button>
 
           <span className="page-info">
-            Page {currentPage} of {effectiveTotalPages}
+            Page {currentPage} of {totalPages}
           </span>
 
           <button
             onClick={() =>
-              onPageChange(Math.min(effectiveTotalPages, currentPage + 1))
+              onPageChange(Math.min(totalPages, currentPage + 1))
             }
-            disabled={currentPage === effectiveTotalPages}
+            disabled={currentPage === totalPages}
           >
             Next
           </button>
