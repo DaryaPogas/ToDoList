@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useReducer } from 'react';
 import { Routes, Route, useLocation, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -12,6 +12,7 @@ import Header from './shared/Header';
 import About from './pages/About';
 import NotFound from './pages/NotFound';
 
+import { reducer as todosReducer, actions as todoActions, initialState as initialTodosState, actions } from './reducers/todo.reducer';
 const AppContainer = styled.div`
   background: url(${backgroundImage});
   padding: 20px;
@@ -19,10 +20,11 @@ const AppContainer = styled.div`
 `;
 
 function App() {
-  const [todoList, setTodoList] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
+  //const [todoList, setTodoList] = useState([]);
+  //const [isLoading, setIsLoading] = useState(false);
+  //const [errorMessage, setErrorMessage] = useState('');
+  //const [isSaving, setIsSaving] = useState(false);
+  const [todoState, dispatch] = useReducer(todosReducer, initialTodosState)
 
   const [sortField, setSortField] = useState('createdTime');
   const [sortDirection, setSortDirection] = useState('desc');
@@ -87,8 +89,8 @@ function App() {
 
   useEffect(() => {
     const fetchAllTodos = async () => {
-      setIsLoading(true);
-      let allTodos = [];
+      dispatch({type:actions.fetchTodos})
+      let allRecords = [];
       let offset = '';
       try {
         do {
@@ -106,25 +108,28 @@ function App() {
 
           const data = await resp.json();
 
-          const todos = data.records.map((record) => ({
+         /*  const todos = data.records.map((record) => ({
             id: record.id,
             ...record.fields,
             createdTime: record.createdTime,
             isCompleted: record.fields.isCompleted || false,
-          }));
+          })); */
 
-          allTodos = [...allTodos, ...todos];
+          allRecords = [...allRecords, ...data.records];
           offset = data.offset;
         } while (offset);
 
-        setTodoList(allTodos);
-      } catch (error) {
-        setErrorMessage(error.message);
-      } finally {
-        setIsLoading(false);
+        dispatch({
+          type:actions.loadTodos,
+          records: allRecords
+        })
+      } catch (error){
+        dispatch({
+          type:actions.setLoadError,
+          error:error.message
+        })
       }
-    };
-
+    }
     fetchAllTodos();
   }, [encodeQueryParams]);
 
