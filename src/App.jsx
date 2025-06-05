@@ -12,7 +12,12 @@ import Header from './shared/Header';
 import About from './pages/About';
 import NotFound from './pages/NotFound';
 
-import { reducer as todosReducer, actions as todoActions, initialState as initialTodosState, actions } from './reducers/todo.reducer';
+import {
+  reducer as todosReducer,
+  actions as todoActions,
+  initialState as initialTodosState,
+  actions,
+} from './reducers/todo.reducer';
 const AppContainer = styled.div`
   background: url(${backgroundImage});
   padding: 20px;
@@ -24,7 +29,7 @@ function App() {
   //const [isLoading, setIsLoading] = useState(false);
   //const [errorMessage, setErrorMessage] = useState('');
   //const [isSaving, setIsSaving] = useState(false);
-  const [todoState, dispatch] = useReducer(todosReducer, initialTodosState)
+  const [todoState, dispatch] = useReducer(todosReducer, initialTodosState);
 
   const [sortField, setSortField] = useState('createdTime');
   const [sortDirection, setSortDirection] = useState('desc');
@@ -39,8 +44,7 @@ function App() {
   const itemsPerPage = 15;
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
 
-  
-  const filteredTodos = todoList.filter((todo) => !todo.isCompleted);
+  const filteredTodos = todoState.todoList.filter((todo) => !todo.isCompleted);
 
   const totalPages = Math.max(
     1,
@@ -89,7 +93,7 @@ function App() {
 
   useEffect(() => {
     const fetchAllTodos = async () => {
-      dispatch({type:actions.fetchTodos})
+      dispatch({ type: actions.fetchTodos });
       let allRecords = [];
       let offset = '';
       try {
@@ -108,7 +112,7 @@ function App() {
 
           const data = await resp.json();
 
-         /*  const todos = data.records.map((record) => ({
+          /*  const todos = data.records.map((record) => ({
             id: record.id,
             ...record.fields,
             createdTime: record.createdTime,
@@ -120,16 +124,16 @@ function App() {
         } while (offset);
 
         dispatch({
-          type:actions.loadTodos,
-          records: allRecords
-        })
-      } catch (error){
+          type: actions.loadTodos,
+          records: allRecords,
+        });
+      } catch (error) {
         dispatch({
-          type:actions.setLoadError,
-          error:error.message
-        })
+          type: actions.setLoadError,
+          error: error.message,
+        });
       }
-    }
+    };
     fetchAllTodos();
   }, [encodeQueryParams]);
 
@@ -146,7 +150,7 @@ function App() {
     };
 
     try {
-      dispatch({type:actions.startRequest});
+      dispatch({ type: actions.startRequest });
       const resp = await fetch(url, {
         method: 'POST',
         headers: {
@@ -166,39 +170,35 @@ function App() {
         isCompleted: records[0].fields.isCompleted || false,
       };
 
-     dispatch({type: actions.addTodo, records:records})
-      setSearchParams({ page: 1 }); 
+      dispatch({ type: actions.addTodo, record: records[0] });
+      setSearchParams({ page: 1 });
     } catch (error) {
       console.error(error);
-      dispatch({type:actions.setLoadError, error: error.message});
+      dispatch({ type: actions.setLoadError, error: error.message });
     } finally {
-      dispatch({type:actions.endRequest});
+      dispatch({ type: actions.endRequest });
     }
   };
 
   const completeTodo = async (id) => {
-    const originalTodos = [...todoList];
+    //const originalTodos = todoState.todoList
 
-    const updatedList = todoList.map((todo) =>
-      todo.id === id ? { ...todo, isCompleted: true } : todo
-    );
-    setTodoList(updatedList);
+    dispatch({ type: actions.completeTodo, id });
 
     try {
-      const todoToUpdate = todoList.find((todo) => todo.id === id);
       const payload = {
         records: [
           {
             id: id,
             fields: {
-              title: todoToUpdate.title,
+              //title: todoToUpdate.title,
               isCompleted: true,
             },
           },
         ],
       };
 
-      const resp = await fetch(url, {
+      await fetch(url, {
         method: 'PATCH',
         headers: {
           Authorization: token,
@@ -206,17 +206,20 @@ function App() {
         },
         body: JSON.stringify(payload),
       });
-
-      if (!resp.ok) throw new Error('Failed to complete todo');
     } catch (error) {
       console.error(error);
-      setTodoList(originalTodos);
-      setErrorMessage(error.message);
+      const todoToRevert = todoState.todoList.find((todo) => todo.id === id);
+      dispatch({ type: actions.revertTodo, originalTodo: todoToRevert });
     }
   };
 
   const updateTodo = async (editedTodo) => {
-    const originalTodo = todoList.find((todo) => todo.id === editedTodo.id);
+    const originalTodos = todoState.todoList;
+    dispatch({
+      type: actions.updateTodo,
+      todo: editedTodo,
+      error: error ? error.message : undefined,
+    });
 
     const payload = {
       records: [
@@ -239,28 +242,14 @@ function App() {
         },
         body: JSON.stringify(payload),
       });
-
-      if (!resp.ok) throw new Error('Failed to update todo');
-
-      const { records } = await resp.json();
-      const updatedTodo = {
-        id: records[0].id,
-        ...records[0].fields,
-        isCompleted: records[0].fields.isCompleted || false,
-      };
-
-      setTodoList((prev) =>
-        prev.map((todo) => (todo.id === updatedTodo.id ? updatedTodo : todo))
-      );
     } catch (error) {
       console.error(error);
-      setErrorMessage(`${error.message}. Reverting changes...`);
-      setTodoList((prev) =>
-        prev.map((todo) => (todo.id === originalTodo.id ? originalTodo : todo))
+      const todoToRevert = todoState.todoList.find(
+        (todo) => todo.id === editedTodo.id
       );
+      dispatch({ type: actions.revertTodo, originalTodo: todoToRevert });
     }
   };
-
   return (
     <AppContainer>
       <Header title={title} />
@@ -270,10 +259,10 @@ function App() {
             path="/"
             element={
               <TodosPage
-                todoList={currentTodos} 
-                isLoading={isLoading}
-                errorMessage={errorMessage}
-                isSaving={isSaving}
+                todoList={currentTodos}
+                isLoading={todoState.isLoading}
+                errorMessage={todoState.errorMessage}
+                isSaving={todoState.isSaving}
                 sortField={sortField}
                 sortDirection={sortDirection}
                 queryString={queryString}
@@ -283,7 +272,7 @@ function App() {
                 setSortDirection={setSortDirection}
                 setSortField={setSortField}
                 setQueryString={setQueryString}
-                totalPages={totalPages} 
+                totalPages={totalPages}
                 currentPage={currentPage}
                 onPageChange={handlePageChange}
                 itemsPerPage={itemsPerPage}

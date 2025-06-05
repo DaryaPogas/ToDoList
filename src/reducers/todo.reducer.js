@@ -41,7 +41,7 @@ function reducer(state = initialState, action) {
     case actions.setLoadError:
       return {
         ...state,
-        errorMessage: action.error.message,
+        errorMessage: action.error,
         isLoading: false
       };
 
@@ -74,24 +74,19 @@ function reducer(state = initialState, action) {
 
     case actions.updateTodo: {
       const updatedTodoList = state.todoList.map((todo) =>
-        todo.id === action.editedTodo.id
+        todo.id === action.todo.id
           ? {
-              ...action.editedTodo,
+              ...action.Todo,
               createdTime: action.editedTodo.createdTime || todo.createdTime,
             }
           : todo
       )
 
-      const updatedState = {
+      return {
         ...state,
         todoList: updatedTodoList,
-      };
-
-      if (action.error) {
-        updatedState.errorMessage = `${action.error.message}. Reverting changes...`;
+        errorMessage: action.error ? `${action.error.message}. Reverting changes...` : state.errorMessage
       }
-
-      return updatedState;
     }
 
     case actions.completeTodo: {
@@ -115,7 +110,9 @@ function reducer(state = initialState, action) {
         todoList: state.todoList.map((todo) =>
           todo.id === action.originalTodo.id ? action.originalTodo : todo
         ),
-        errorMessage: `${action.error.message}. Reverting changes...`,
+        errorMessage: action.error
+          ? `${action.error}. Reverting changes...`
+          : state.errorMessage,
       };
     }
 
