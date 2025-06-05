@@ -146,7 +146,7 @@ function App() {
     };
 
     try {
-      setIsSaving(true);
+      dispatch({type:actions.startRequest});
       const resp = await fetch(url, {
         method: 'POST',
         headers: {
@@ -166,13 +166,13 @@ function App() {
         isCompleted: records[0].fields.isCompleted || false,
       };
 
-      setTodoList((prev) => [savedTodo, ...prev]);
+     dispatch({type: actions.addTodo, records:records})
       setSearchParams({ page: 1 }); 
     } catch (error) {
       console.error(error);
-      setErrorMessage(error.message);
+      dispatch({type:actions.setLoadError, error: error.message});
     } finally {
-      setIsSaving(false);
+      dispatch({type:actions.endRequest});
     }
   };
 
